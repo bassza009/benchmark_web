@@ -8,6 +8,7 @@ import type { AlgoResult, Benchmark, WebResult } from "./types";
 const INDEX = { noIndex: "web-main-get-no-index", withIndex: "web-main-get-with-index", tier: "general", endpoint: "4join", env: "bme" };
 const DOCKER = { slug: "web-main-get-no-index", tier: "general", endpoint: "1table" };
 const GAP_SLUG = "algo-fibonacci"; // heavy CPU task, so start-up time does not distort the gap
+const WEB_CARD = { tier: "general", env: "bme" }; // what the big web cards on top show
 
 export type IndexRow = { language: string; noIndex: number; withIndex: number; speedup: number };
 export type DockerRow = { language: string; bme: number; docker: number; change: number };
@@ -17,6 +18,29 @@ export type Heatmap = {
   ratio: Record<string, Record<string, number | null>>; // [slug][language] = times slower than fastest
   maxRatio: number;
 };
+
+export type WebCard = {
+  benchmark: Benchmark;
+  endpoint: string;
+  tier: string;
+  bars: { language: string; rps: number; p99: number | null }[]; // fastest first
+};
+
+// One big card per web benchmark: req/s of every language (General load, first endpoint, bare metal)
+export function buildWebCards(benchmarks: Benchmark[], web: WebResult[]): WebCard[] {
+  return benchmarks
+    .filter((b) => b.category === "web")
+    .map((benchmark) => {
+      const rows = web.filter((r) => r.benchmark_slug === benchmark.slug);
+      const endpoint = [...new Set(rows.map((r) => r.endpoint))].sort()[0] ?? "";
+      const bars = rows
+        .filter((r) => r.tier === WEB_CARD.tier && r.environment === WEB_CARD.env && r.endpoint === endpoint && r.rps_mean)
+        .map((r) => ({ language: r.language, rps: r.rps_mean!, p99: r.lat_p99_ms }))
+        .sort((a, b) => b.rps - a.rps);
+      return { benchmark, endpoint, tier: WEB_CARD.tier, bars };
+    })
+    .filter((card) => card.bars.length > 0);
+}
 
 export function buildHighlights(benchmarks: Benchmark[], web: WebResult[], algo: AlgoResult[]) {
   const rps = (slug: string, language: string, env: string, tier: string, endpoint: string) =>

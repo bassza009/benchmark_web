@@ -4,10 +4,11 @@ import {
 } from "lucide-react";
 import { DockerChart, IndexChart } from "@/components/HomeCharts";
 import SpeedHeatmap from "@/components/SpeedHeatmap";
+import WebFeatured from "@/components/WebFeatured";
 import { Card } from "@/components/ui";
 import { getAlgoResults, getBenchmarks, getLatestBatch, getWebResults } from "@/lib/db";
 import { fmtDate, fmtNum } from "@/lib/format";
-import { buildHighlights } from "@/lib/highlights";
+import { buildHighlights, buildWebCards } from "@/lib/highlights";
 import { benchmarkDescription, benchmarkTitle, isLang, t } from "@/lib/i18n";
 import { PRESETS, presetHref } from "@/lib/presets";
 import type { Benchmark } from "@/lib/types";
@@ -26,14 +27,14 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
     getAlgoResults(null),
   ]);
 
-  const web = benchmarks.filter((b) => b.category === "web");
   const algorithm = benchmarks.filter((b) => b.category === "algorithm");
   const h = buildHighlights(benchmarks, webRows, algoRows);
+  const webCards = buildWebCards(benchmarks, webRows);
   const gapBenchmark = benchmarks.find((b) => b.slug === h.gapSlug);
   const indexPreset = PRESETS.find((p) => p.series[0]?.includes("|4join"));
 
   function BenchmarkCard({ b }: { b: Benchmark }) {
-    const sub = b.category === "web" ? `${b.db_engine} · ${b.suite} suite` : benchmarkDescription(b, lang);
+    const sub = benchmarkDescription(b, lang);
     return (
       <Link
         href={`/${lang}/benchmark/${b.slug}`}
@@ -101,6 +102,21 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
 
       {benchmarks.length === 0 && <p className="text-muted">{text.noData}</p>}
 
+      {/* Web benchmarks: the main results, so they come first */}
+      {webCards.length > 0 && (
+        <section className="space-y-4">
+          <div>
+            <h2 className="flex items-center gap-2 text-2xl font-bold">
+              <Database className="h-6 w-6 text-accent" />
+              {text.home.web}
+              <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold text-white">{text.home.mainBadge}</span>
+            </h2>
+            <p className="mt-1 text-muted">{text.home.webHint}</p>
+          </div>
+          <WebFeatured lang={lang} cards={webCards} />
+        </section>
+      )}
+
       {/* Key findings */}
       {(h.bestIndex || h.worstDocker || h.gap) && (
         <section className="space-y-4">
@@ -157,21 +173,6 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
               <SpeedHeatmap lang={lang} data={h.heatmap} fastestLabel={f.heatFastest} slowestLabel={f.heatSlowest} />
             </Card>
           )}
-        </section>
-      )}
-
-      {web.length > 0 && (
-        <section>
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Database className="h-5 w-5 text-accent" />
-            {text.home.web}
-          </h2>
-          <p className="mb-3 text-sm text-muted">{text.home.webHint}</p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {web.map((b) => (
-              <BenchmarkCard key={b.slug} b={b} />
-            ))}
-          </div>
         </section>
       )}
 
