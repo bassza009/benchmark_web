@@ -28,7 +28,7 @@
 
 | ไฟล์ | ตัวแปร |
 |---|---|
-| `Benchmark-web/.env` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+| `Benchmark-web/.env` (และ Vercel) | `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` |
 | `Programming-Benchmark/.env` | `SUPABASE_URL`, `SUPABASE_SECRET_KEY` |
 
 ## Schema

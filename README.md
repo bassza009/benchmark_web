@@ -5,7 +5,7 @@
 ## เริ่มใช้งาน
 
 ```bash
-cp .env.example .env   # ใส่ NEXT_PUBLIC_SUPABASE_URL และ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+cp .env.example .env   # ใส่ SUPABASE_URL และ SUPABASE_PUBLISHABLE_KEY
 npm install
 npm run dev            # http://localhost:3000
 ```

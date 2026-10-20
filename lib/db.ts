@@ -3,8 +3,9 @@
 
 import type { AlgoResult, Batch, Benchmark, WebResult } from "./types";
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+// Only read on the server, so the NEXT_PUBLIC_ prefix is optional (both names work)
+const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const PAGE_SIZE = 1000; // Supabase returns at most 1000 rows per request
 
 const WEB_COLUMNS = [
@@ -23,8 +24,8 @@ const ALGO_COLUMNS = [
 async function query<T>(table: string, params: Record<string, string>): Promise<T[]> {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     const missing = [
-      !SUPABASE_URL && "NEXT_PUBLIC_SUPABASE_URL",
-      !SUPABASE_KEY && "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+      !SUPABASE_URL && "SUPABASE_URL",
+      !SUPABASE_KEY && "SUPABASE_PUBLISHABLE_KEY",
     ].filter(Boolean);
     // On Vercel: Settings -> Environment Variables (tick Production), then redeploy
     throw new Error(`Missing env: ${missing.join(", ")} (local: .env, Vercel: Settings -> Environment Variables)`);
