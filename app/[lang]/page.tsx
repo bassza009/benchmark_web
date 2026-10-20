@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, Cpu, Database, GitCompareArrows, RefreshCw } from "lucide-react";
-import { getBenchmarks, getLatestBatch } from "@/lib/db";
-import { fmtDate } from "@/lib/format";
+import {
+  ArrowRight, Container, Cpu, Database, Flame, GitCompareArrows, Grid3x3, Layers, RefreshCw, Sparkles, type LucideIcon,
+} from "lucide-react";
+import { DockerChart, IndexChart } from "@/components/HomeCharts";
+import SpeedHeatmap from "@/components/SpeedHeatmap";
+import { Card } from "@/components/ui";
+import { getAlgoResults, getBenchmarks, getLatestBatch, getWebResults } from "@/lib/db";
+import { fmtDate, fmtNum } from "@/lib/format";
+import { buildHighlights } from "@/lib/highlights";
 import { benchmarkDescription, benchmarkTitle, isLang, t } from "@/lib/i18n";
 import { PRESETS, presetHref } from "@/lib/presets";
 import type { Benchmark } from "@/lib/types";
@@ -12,10 +18,19 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
   const { lang: rawLang } = await params;
   const lang = isLang(rawLang) ? rawLang : "en";
   const text = t(lang);
-  const [benchmarks, batch] = await Promise.all([getBenchmarks(), getLatestBatch()]);
+  const f = text.findings;
+  const [benchmarks, batch, webRows, algoRows] = await Promise.all([
+    getBenchmarks(),
+    getLatestBatch(),
+    getWebResults(null),
+    getAlgoResults(null),
+  ]);
 
   const web = benchmarks.filter((b) => b.category === "web");
   const algorithm = benchmarks.filter((b) => b.category === "algorithm");
+  const h = buildHighlights(benchmarks, webRows, algoRows);
+  const gapBenchmark = benchmarks.find((b) => b.slug === h.gapSlug);
+  const indexPreset = PRESETS.find((p) => p.series[0]?.includes("|4join"));
 
   function BenchmarkCard({ b }: { b: Benchmark }) {
     const sub = b.category === "web" ? `${b.db_engine} · ${b.suite} suite` : benchmarkDescription(b, lang);
@@ -33,21 +48,117 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
     );
   }
 
+  // Big-number card at the top of the page
+  function FindingCard({ icon: Icon, label, value, body, href }: { icon: LucideIcon; label: string; value: string; body: string; href: string }) {
+    return (
+      <Link href={href} className="group flex flex-col rounded-2xl border border-line bg-card p-5 transition-colors hover:border-accent">
+        <div className="flex items-center gap-2 text-sm font-medium text-muted">
+          <span className="rounded-lg bg-accent-soft p-1.5">
+            <Icon className="h-4 w-4 text-accent" />
+          </span>
+          {label}
+        </div>
+        <div className="tabular mt-3 text-5xl font-bold tracking-tight text-accent-text">{value}</div>
+        <p className="mt-2 flex-1 text-muted">{body}</p>
+        <span className="mt-3 flex items-center gap-1 text-sm font-medium text-accent-text">
+          {f.explore}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </span>
+      </Link>
+    );
+  }
+
   return (
-    <div className="space-y-10">
-      <section>
-        <h1 className="text-2xl font-semibold sm:text-3xl">{text.home.title}</h1>
-        <p className="mt-2 max-w-2xl text-muted">{text.home.intro}</p>
-        {batch && (
-          <p className="mt-3 flex items-center gap-1.5 text-sm text-faint">
-            <RefreshCw className="h-3.5 w-3.5" />
-            {text.home.lastSync}: {fmtDate(batch.created_at, lang)}
-            {batch.git_commit && <span className="tabular">· {batch.git_commit.slice(0, 7)}</span>}
-          </p>
-        )}
+    <div className="space-y-12">
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl border border-line bg-card px-6 py-10 sm:px-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-60 blur-3xl"
+          style={{ background: "color-mix(in srgb, var(--accent) 35%, transparent)" }}
+        />
+        <div className="relative">
+          <h1 className="max-w-3xl text-3xl font-bold leading-tight sm:text-4xl">{text.home.title}</h1>
+          <p className="mt-3 max-w-2xl text-lg text-muted">{text.home.intro}</p>
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <Link
+              href={`/${lang}/compare`}
+              className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 font-medium text-white hover:opacity-90"
+            >
+              <GitCompareArrows className="h-4 w-4" />
+              {text.nav.compare}
+            </Link>
+            {batch && (
+              <span className="flex items-center gap-1.5 text-sm text-faint">
+                <RefreshCw className="h-3.5 w-3.5" />
+                {text.home.lastSync}: {fmtDate(batch.created_at, lang)}
+                {batch.git_commit && <span className="tabular">· {batch.git_commit.slice(0, 7)}</span>}
+              </span>
+            )}
+          </div>
+        </div>
       </section>
 
       {benchmarks.length === 0 && <p className="text-muted">{text.noData}</p>}
+
+      {/* Key findings */}
+      {(h.bestIndex || h.worstDocker || h.gap) && (
+        <section className="space-y-4">
+          <h2 className="flex items-center gap-2 text-xl font-semibold">
+            <Sparkles className="h-5 w-5 text-accent" />
+            {f.title}
+          </h2>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {h.bestIndex && (
+              <FindingCard
+                icon={Layers}
+                label={f.indexLabel}
+                value={`×${fmtNum(h.bestIndex.speedup, 1)}`}
+                body={f.indexText(h.bestIndex.language, `×${fmtNum(h.bestIndex.speedup, 1)}`)}
+                href={indexPreset ? presetHref(lang, indexPreset) : `/${lang}/compare`}
+              />
+            )}
+            {h.worstDocker && (
+              <FindingCard
+                icon={Container}
+                label={f.dockerLabel}
+                value={`${fmtNum(h.worstDocker.change, 0)}%`}
+                body={f.dockerText(h.worstDocker.language, `${fmtNum(Math.abs(h.worstDocker.change), 0)}%`)}
+                href={`/${lang}/benchmark/${h.dockerSettings.slug}`}
+              />
+            )}
+            {h.gap && (
+              <FindingCard
+                icon={Flame}
+                label={f.gapLabel}
+                value={`×${fmtNum(h.gap.ratio, 0)}`}
+                body={f.gapText(h.gap.slow.language, h.gap.fast.language, `×${fmtNum(h.gap.ratio, 0)}`, gapBenchmark ? benchmarkTitle(gapBenchmark, lang) : h.gapSlug)}
+                href={`/${lang}/benchmark/${h.gapSlug}`}
+              />
+            )}
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            {h.indexRows.length > 0 && (
+              <Card title={f.indexTitle} hint={f.indexHint} icon={Layers}>
+                <IndexChart rows={h.indexRows} noIndexLabel={f.noIndex} withIndexLabel={f.withIndex} />
+              </Card>
+            )}
+            {h.dockerRows.length > 0 && (
+              <Card title={f.dockerTitle} hint={f.dockerHint} icon={Container}>
+                <DockerChart rows={h.dockerRows} />
+              </Card>
+            )}
+          </div>
+
+          {h.heatmap.benchmarks.length > 0 && (
+            <Card title={f.heatTitle} hint={f.heatHint} icon={Grid3x3}>
+              <SpeedHeatmap lang={lang} data={h.heatmap} fastestLabel={f.heatFastest} slowestLabel={f.heatSlowest} />
+            </Card>
+          )}
+        </section>
+      )}
 
       {web.length > 0 && (
         <section>
