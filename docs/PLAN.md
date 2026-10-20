@@ -9,7 +9,7 @@
 |---|---|---|
 | 1 | Real time | หลัง sync เว็บแสดงข้อมูลล่าสุด (ISR `revalidate = 60`) + filter/compare ทำฝั่ง client ตอบสนองทันที ไม่มี live streaming ระหว่างรัน |
 | 2 | Sync | เฟส A: รัน `Programming-Benchmark/scripts/sync_to_supabase.py` ด้วยมือหลัง `generate_summary.py` → เฟส B: GitHub Action ใน Programming-Benchmark เมื่อ push |
-| 3 | Scope | เฟส 1: web `main_web_benchmark` (MySQL) + `pos_web_benchmark` (PostgreSQL) + algorithm ที่มี hyperfine JSON (factorial, fibonacci, matrix, door, prisoners) · เฟส 2: CSV ทำมือ (prime ฯลฯ) หรือรันใหม่ด้วย hyperfine · ลบ `results/web_benchmark/` (สำเนาเก่า) |
+| 3 | Scope | เฟส 1: web `main_web_benchmark` (MySQL) เท่านั้น (`pos_web_benchmark` ยังไม่ครบ ปิดไว้ใน `WEB_SUITES` ก่อน) + algorithm ที่มี hyperfine JSON (factorial, fibonacci, matrix, door, prisoners) · เฟส 2: CSV ทำมือ (prime ฯลฯ) หรือรันใหม่ด้วย hyperfine · ลบ `results/web_benchmark/` (สำเนาเก่า) |
 | 4 | Compare | (A) ติ๊กเลือกภาษาในหน้า benchmark · (B) `/compare` เลือก series 2–6 ชุด (lang · env · tier · endpoint · suite) state อยู่ใน URL · preset = ลิงก์ · ต้องเลือกประเภท web/algorithm ก่อน (หน่วยต่างกัน) |
 | 5 | ข้อมูล | snapshot ต่อ `run_batches` (status pending→complete) · เว็บอ่าน view `latest_*` · เก็บ `raw_runs`/`times` เป็น jsonb · ยังไม่มี UI ดูประวัติ |
 | 6 | Deploy | Vercel public, root directory = repo นี้ · RLS อ่านอย่างเดียว · เว็บใช้ publishable key · secret key อยู่แค่ `Programming-Benchmark/.env` (และ GitHub Secrets ในเฟส B) |
@@ -18,7 +18,7 @@
 | 9 | ธีม | Light เป็นค่าเริ่มต้น + toggle dark (`#1C1917`) · accent ส้ม `#EA580C` · text `#1C1917`/`#57534E` · bg `#FAFAF9` · ฟอนต์ IBM Plex Sans Thai · tabular numbers · สีภาษา 5 สี colorblind-safe ใช้ได้ทั้ง 2 โหมด |
 | 10 | ที่ตั้ง | เว็บ + migration: `Benchmark-web/` · สคริปต์ sync: `Programming-Benchmark/scripts/` |
 
-**Stack:** Next.js (App Router) · Tailwind CSS · Recharts · `@supabase/supabase-js` · `lucide-react` (icons)
+**Stack:** Next.js (App Router, TypeScript แบบเรียบ: ใส่ type เฉพาะข้อมูลหลัก) · Tailwind CSS · Recharts · `@supabase/supabase-js` · `lucide-react` (icons)
 
 **กติกาการเขียน:**
 - ใช้ icon จาก `lucide-react` ทุกที่ที่ใช้ได้ ห้ามใช้อิโมจิ
@@ -58,8 +58,8 @@ Normalization ที่สคริปต์ sync ต้องทำ:
 ## ลำดับงาน
 
 1. [x] `.gitignore`, แผนนี้, migration SQL
-2. [ ] ผู้ใช้รัน `001_init.sql` ใน Supabase SQL Editor
-3. [ ] `Programming-Benchmark`: `scripts/sync_to_supabase.py`, ลบ `results/web_benchmark/`, เพิ่มขั้นตอนใน AGENTS.md, sync ครั้งแรก
+2. [x] ผู้ใช้รัน `001_init.sql` ใน Supabase SQL Editor
+3. [x] `Programming-Benchmark`: [x] `scripts/sync_to_supabase.py` · [x] ลบ `results/web_benchmark/` · [x] AGENTS.md ข้อ 4 · [x] sync ครั้งแรก (batch #1)
 4. [ ] Next.js scaffold, ธีม, i18n, หน้าแรก, หน้า benchmark, หน้า compare
 5. [ ] `npm run dev` ตรวจหน้าจริงและปรับแก้ → deploy Vercel
 6. [ ] เฟส B: GitHub Action · เฟส 2: algorithm จาก CSV
