@@ -22,7 +22,12 @@ const ALGO_COLUMNS = [
 
 async function query<T>(table: string, params: Record<string, string>): Promise<T[]> {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in .env");
+    const missing = [
+      !SUPABASE_URL && "NEXT_PUBLIC_SUPABASE_URL",
+      !SUPABASE_KEY && "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    ].filter(Boolean);
+    // On Vercel: Settings -> Environment Variables (tick Production), then redeploy
+    throw new Error(`Missing env: ${missing.join(", ")} (local: .env, Vercel: Settings -> Environment Variables)`);
   }
 
   const rows: T[] = [];
