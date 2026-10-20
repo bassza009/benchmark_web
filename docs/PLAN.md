@@ -18,7 +18,7 @@
 | 9 | ธีม | Light เป็นค่าเริ่มต้น + toggle dark (`#1C1917`) · accent ส้ม `#EA580C` · text `#1C1917`/`#57534E` · bg `#FAFAF9` · ฟอนต์ IBM Plex Sans Thai · tabular numbers · สีภาษา 5 สี colorblind-safe ใช้ได้ทั้ง 2 โหมด |
 | 10 | ที่ตั้ง | เว็บ + migration: `Benchmark-web/` · สคริปต์ sync: `Programming-Benchmark/scripts/` |
 
-**Stack:** Next.js (App Router, TypeScript แบบเรียบ: ใส่ type เฉพาะข้อมูลหลัก) · Tailwind CSS · Recharts · `@supabase/supabase-js` · `lucide-react` (icons)
+**Stack:** Next.js (App Router, TypeScript แบบเรียบ: ใส่ type เฉพาะข้อมูลหลัก) · Tailwind CSS · Recharts · Supabase REST API ผ่าน `fetch` (ไม่ใช้ supabase-js เพราะเวอร์ชันล่าสุดต้องใช้ Node 22) · `lucide-react` (icons)
 
 **กติกาการเขียน:**
 - ใช้ icon จาก `lucide-react` ทุกที่ที่ใช้ได้ ห้ามใช้อิโมจิ
@@ -51,8 +51,8 @@ Normalization ที่สคริปต์ sync ต้องทำ:
 ## โครงหน้า
 
 - `/[lang]`: หน้าแรก การ์ด benchmark แบ่ง Web / Algorithm + ลิงก์ preset compare
-- `/[lang]/web/[suite]/[benchmark]`: filter (env, lang, endpoint) · KPI tiles · Throughput vs Tier (line + CI95) · Latency percentiles (grouped bar) · Endpoint 1table→4join (bar) · ตารางสถิติเต็ม (sort, export CSV)
-- `/[lang]/algorithm/[benchmark]`: filter (env, lang) · mean time bar + SD · dot plot ราย run · ตาราง (mean, SD, median, min, max, Docker overhead %)
+- `/[lang]/benchmark/[slug]` (web): filter (env, lang, endpoint) · KPI tiles · Throughput vs Tier (line + CI95) · Latency percentiles (grouped bar) · Endpoint 1table→4join (bar) · ตารางสถิติเต็ม (sort, export CSV)
+- `/[lang]/benchmark/[slug]` (algorithm): filter (env, lang) · mean time bar + SD · dot plot ราย run · ตาราง (mean, SD, median, min, max, Docker overhead %)
 - `/[lang]/compare?type=web&s=...`: series picker · bar chart · ตารางเทียบพร้อม % ต่างจาก series แรก
 
 ## ลำดับงาน
@@ -60,6 +60,6 @@ Normalization ที่สคริปต์ sync ต้องทำ:
 1. [x] `.gitignore`, แผนนี้, migration SQL
 2. [x] ผู้ใช้รัน `001_init.sql` ใน Supabase SQL Editor
 3. [x] `Programming-Benchmark`: [x] `scripts/sync_to_supabase.py` · [x] ลบ `results/web_benchmark/` · [x] AGENTS.md ข้อ 4 · [x] sync ครั้งแรก (batch #1)
-4. [ ] Next.js scaffold, ธีม, i18n, หน้าแรก, หน้า benchmark, หน้า compare
+4. [x] Next.js scaffold, ธีม, i18n, หน้าแรก, หน้า benchmark, หน้า compare
 5. [ ] `npm run dev` ตรวจหน้าจริงและปรับแก้ → deploy Vercel
 6. [ ] เฟส B: GitHub Action · เฟส 2: algorithm จาก CSV

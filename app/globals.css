@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme colors. Light is the default; the "dark" class on <html> switches to dark. */
+:root {
+  color-scheme: light;
+  --bg: #fafaf9;
+  --card: #ffffff;
+  --ink: #1c1917;          /* main text */
+  --muted: #57534e;        /* secondary text */
+  --faint: #8a837e;        /* axis labels, hints */
+  --line: #e7e5e4;         /* borders, grid lines */
+  --accent: #ea580c;       /* orange: buttons, active states */
+  --accent-text: #c2410c;  /* orange text (darker so it is readable on white) */
+  --accent-soft: #fff7ed;  /* orange tint background */
+
+  /* Chart colors per language (checked for color-blind safety) */
+  --lang-go: #2a78d6;
+  --lang-php: #eb6834;
+  --lang-node: #1baf7a;
+  --lang-java: #eda100;
+  --lang-python: #e87ba4;
+  --lang-python-opt: #008300;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #1c1917;
+  --card: #292524;
+  --ink: #f5f5f4;
+  --muted: #d6d3d1;
+  --faint: #a8a29e;
+  --line: #44403c;
+  --accent: #f97316;
+  --accent-text: #fb923c;
+  --accent-soft: #431407;
+
+  --lang-go: #3987e5;
+  --lang-php: #d95926;
+  --lang-node: #199e70;
+  --lang-java: #c98500;
+  --lang-python: #d55181;
+  --lang-python-opt: #008300;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* Numbers line up in tables and axes */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recharts: no focus outline box around the whole chart */
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
