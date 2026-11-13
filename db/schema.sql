@@ -1,11 +1,11 @@
--- Benchmark-web: initial schema
--- Run once in Supabase Dashboard → SQL Editor.
+-- Benchmark-web: schema for the local PostgreSQL database
+-- Setup (see README): create database benchmark_web, then
+--   psql "$DATABASE_URL" -f db/schema.sql
 --
--- Data flow: Programming-Benchmark/scripts/sync_to_supabase.py (secret key)
---   1. inserts a run_batches row with status 'pending'
---   2. upserts benchmarks, inserts web_results / algo_results for that batch
---   3. flips the batch to 'complete'
--- The website (publishable key) reads only the latest_* views.
+-- Data flow: Programming-Benchmark/scripts/sync_to_db.py
+--   inserts one run_batches row + upserts benchmarks + inserts web_results /
+--   algo_results, all in ONE transaction (so the site never sees a half batch).
+-- The website reads only the latest_* views (read-only role benchmark_web_reader).
 
 -- ---------------------------------------------------------------------------
 -- Tables
@@ -103,44 +103,34 @@ create index algo_results_batch_bench_idx on public.algo_results (batch_id, benc
 -- ---------------------------------------------------------------------------
 
 create view public.latest_batch
-with (security_invoker = true) as
+as
   select * from public.run_batches
   where status = 'complete'
   order by id desc
   limit 1;
 
 create view public.latest_web_results
-with (security_invoker = true) as
+as
   select r.*, b.slug as benchmark_slug
   from public.web_results r
   join public.benchmarks b on b.id = r.benchmark_id
   where r.batch_id = (select id from public.latest_batch);
 
 create view public.latest_algo_results
-with (security_invoker = true) as
+as
   select r.*, b.slug as benchmark_slug
   from public.algo_results r
   join public.benchmarks b on b.id = r.benchmark_id
   where r.batch_id = (select id from public.latest_batch);
 
 -- ---------------------------------------------------------------------------
--- Row Level Security: public read-only; writes only via the secret key
--- (the secret key bypasses RLS, so no insert/update policies are defined).
+-- Read-only access for the website
 -- ---------------------------------------------------------------------------
 
-alter table public.run_batches  enable row level security;
-alter table public.benchmarks   enable row level security;
-alter table public.web_results  enable row level security;
-alter table public.algo_results enable row level security;
-
-create policy "public read" on public.run_batches  for select to anon, authenticated using (true);
-create policy "public read" on public.benchmarks   for select to anon, authenticated using (true);
-create policy "public read" on public.web_results  for select to anon, authenticated using (true);
-create policy "public read" on public.algo_results for select to anon, authenticated using (true);
-
-revoke insert, update, delete, truncate on
-  public.run_batches, public.benchmarks, public.web_results, public.algo_results
-  from anon, authenticated;
-
-grant select on public.latest_batch, public.latest_web_results, public.latest_algo_results
-  to anon, authenticated;
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'benchmark_web_reader') then
+    grant usage on schema public to benchmark_web_reader;
+    grant select on all tables in schema public to benchmark_web_reader;
+  end if;
+end $$;
