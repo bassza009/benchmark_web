@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { AlertTriangle, Download, Table2, Timer, TrendingUp, Zap } from "lucide-react";
 import DataTable, { type Column } from "./DataTable";
+import LangLogo from "./LangLogo";
 import { axisProps, Card, Chip, ChartTooltip, FilterGroup, gridProps, Legend, Select, StatTile, Toggle } from "./ui";
 import { downloadCsv } from "@/lib/csv";
 import { fmtInt, fmtMs, fmtNum, fmtRps } from "@/lib/format";
@@ -105,7 +106,7 @@ export default function WebBenchmarkView({ lang, slug, rows }: { lang: Lang; slu
       key: "language", label: text.cols.language, sortValue: (r) => r.language,
       render: (r) => (
         <span className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ background: langColor(r.language) }} />
+          <LangLogo language={r.language} />
           {r.language}
         </span>
       ),
@@ -154,7 +155,7 @@ export default function WebBenchmarkView({ lang, slug, rows }: { lang: Lang; slu
           </FilterGroup>
           <FilterGroup label={text.filters.languages}>
             {allLanguages.map((l) => (
-              <Chip key={l} active={languages.includes(l)} color={langColor(l)} onClick={() => toggle(languages, l, setLanguages)}>
+              <Chip key={l} active={languages.includes(l)} language={l} onClick={() => toggle(languages, l, setLanguages)}>
                 {l}
               </Chip>
             ))}

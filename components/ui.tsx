@@ -2,6 +2,8 @@
 
 import type { LucideIcon } from "lucide-react";
 import { DOCKER_DASH, DOCKER_OPACITY } from "@/lib/languages";
+import LangLogo from "./LangLogo";
+import Reveal from "./Reveal";
 
 export function Card({
   title,
@@ -17,35 +19,35 @@ export function Card({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-line bg-card p-4 sm:p-5">
+    <Reveal as="section" className="hud p-4 sm:p-5">
       {(title || actions) && (
         <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
           <div>
             {title && (
-              <h2 className="flex items-center gap-2 font-semibold">
+              <h2 className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-wider">
                 {Icon && <Icon className="h-4 w-4 text-accent" />}
                 {title}
               </h2>
             )}
-            {hint && <p className="mt-0.5 text-sm text-muted">{hint}</p>}
+            {hint && <p className="mt-1 font-mono text-xs text-muted">{hint}</p>}
           </div>
           {actions}
         </div>
       )}
       {children}
-    </section>
+    </Reveal>
   );
 }
 
 export function Chip({
   active,
   onClick,
-  color,
+  language,
   children,
 }: {
   active: boolean;
   onClick: () => void;
-  color?: string;
+  language?: string; // shows that language's logo
   children: React.ReactNode;
 }) {
   return (
@@ -53,10 +55,10 @@ export function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm transition-colors ${
-        active ? "border-accent bg-accent-soft text-ink" : "border-line text-faint hover:text-muted"
+        active ? "border-accent/40 bg-accent-soft text-ink shadow-[0_0_12px_-2px_var(--glow)]" : "border-line text-faint hover:text-muted"
       }`}
     >
-      {color && <span className="h-2.5 w-2.5 rounded-full" style={{ background: color, opacity: active ? 1 : 0.35 }} />}
+      {language && <LangLogo language={language} faded={!active} />}
       {children}
     </button>
   );
@@ -65,7 +67,7 @@ export function Chip({
 export function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="w-full text-xs font-medium uppercase tracking-wide text-faint sm:w-auto">{label}</span>
+      <span className="eyebrow w-full sm:w-auto">{label}</span>
       {children}
     </div>
   );
@@ -84,11 +86,11 @@ export function Select({
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
-      {label && <span className="text-xs font-medium uppercase tracking-wide text-faint">{label}</span>}
+      {label && <span className="eyebrow">{label}</span>}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-md border border-line bg-card px-2.5 py-1.5 text-ink focus:border-accent focus:outline-none"
+        className="rounded-lg border border-line bg-card-2 px-2.5 py-1.5 text-ink focus:border-accent focus:outline-none"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -111,14 +113,14 @@ export function Toggle({ label, checked, onChange }: { label: string; checked: b
 
 export function StatTile({ label, value, sub, icon: Icon }: { label: string; value: string; sub?: string; icon: LucideIcon }) {
   return (
-    <div className="rounded-xl border border-line bg-card p-4">
-      <div className="flex items-center gap-2 text-sm text-muted">
+    <Reveal className="hud p-4">
+      <div className="mb-2 flex items-center justify-between text-muted">
+        <span className="font-mono text-xs uppercase tracking-wider">{label}</span>
         <Icon className="h-4 w-4 text-accent" />
-        {label}
       </div>
-      <div className="mt-1 text-2xl font-semibold">{value}</div>
-      {sub && <div className="mt-0.5 text-sm text-muted">{sub}</div>}
-    </div>
+      <div className="tabular neon font-mono text-2xl font-extrabold tracking-tight">{value}</div>
+      {sub && <div className="mt-2 border-t border-line pt-2 font-mono text-xs text-muted">{sub}</div>}
+    </Reveal>
   );
 }
 
@@ -162,13 +164,13 @@ export function ChartTooltip({
   if (!active || !payload?.length) return null;
   const items = payload.filter((p) => typeof p.value === "number");
   return (
-    <div className="rounded-lg border border-line bg-card px-3 py-2 text-sm shadow-md">
-      {label && <div className="mb-1 font-medium">{label}</div>}
+    <div className="rounded-lg border border-accent/40 bg-card px-3 py-2 font-mono text-xs shadow-[0_0_16px_-2px_var(--glow)]">
+      {label && <div className="mb-1 font-semibold text-ink">{label}</div>}
       {items.map((p) => (
         <div key={String(p.dataKey ?? p.name)} className="flex items-center gap-2">
           <span className="h-2.5 w-2.5 rounded-full" style={{ background: p.stroke || p.color || p.fill }} />
           <span className="text-muted">{p.name}</span>
-          <span className="tabular ml-auto pl-3 font-medium">{format(p.value as number)}</span>
+          <span className="tabular ml-auto pl-3 font-bold">{format(p.value as number)}</span>
         </div>
       ))}
     </div>

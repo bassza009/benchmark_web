@@ -16,7 +16,7 @@ export default async function ComparePage({ params }: { params: Promise<{ lang: 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="flex items-center gap-2 text-2xl font-semibold">
+        <h1 className="flex items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl">
           <GitCompareArrows className="h-6 w-6 text-accent" />
           {text.compare.title}
         </h1>

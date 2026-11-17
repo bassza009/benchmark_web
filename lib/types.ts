@@ -1,4 +1,4 @@
-// Shapes of the rows we read from Supabase (see supabase/migrations/001_init.sql)
+// Shapes of the rows we read from PostgreSQL (see db/schema.sql)
 
 export type Benchmark = {
   id: number;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { fmtNum } from "@/lib/format";
 import type { Heatmap } from "@/lib/highlights";
 import { benchmarkTitle, type Lang } from "@/lib/i18n";
-import { langColor } from "@/lib/languages";
+import LangLogo from "./LangLogo";
 
 // Table of "times slower than the fastest". Darker orange = slower.
 // Uses a log scale, because the gaps go from ×1 to ×400.
@@ -48,7 +48,7 @@ export default function SpeedHeatmap({
               <tr key={language}>
                 <th className="whitespace-nowrap pr-2 text-left font-medium">
                   <span className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: langColor(language) }} />
+                    <LangLogo language={language} />
                     {language}
                   </span>
                 </th>

@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, Cell, ErrorBar, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowDownRight, ArrowUpRight, BarChart3, Plus, Table2, X } from "lucide-react";
+import LangLogo from "./LangLogo";
 import { axisProps, Card, ChartTooltip, Select } from "./ui";
 import { fmtInt, fmtMs, fmtNum, fmtPct, fmtRps, fmtSec, fmtSecAxis } from "@/lib/format";
 import { benchmarkTitle, endpointLabel, t, type Lang } from "@/lib/i18n";
@@ -187,7 +188,7 @@ export default function CompareView({
         {series.length < MAX_SERIES && series.length > 0 && (
           <button
             onClick={() => update({ series: [...series, [...series[series.length - 1]]] })}
-            className="mt-3 flex items-center gap-1.5 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:opacity-90"
+            className="mt-3 flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-bold text-on-accent shadow-[0_0_16px_-2px_var(--glow)]"
           >
             <Plus className="h-4 w-4" />
             {text.compare.addSeries}
@@ -207,7 +208,7 @@ export default function CompareView({
                 const d = payload?.[0]?.payload as (typeof chartData)[number] | undefined;
                 if (!active || !d) return null;
                 return (
-                  <div className="rounded-lg border border-line bg-card px-3 py-2 text-sm shadow-md">
+                  <div className="rounded-lg border border-accent/40 bg-card px-3 py-2 font-mono text-xs shadow-[0_0_16px_-2px_var(--glow)]">
                     <div className="font-medium">{d.name}</div>
                     <div className="text-muted">{d.label}</div>
                     <div className="tabular mt-1 font-medium">{format(d.value)}</div>
@@ -261,7 +262,7 @@ export default function CompareView({
                     <td className="px-2 py-1.5 font-semibold">{s.id}</td>
                     <td className="px-2 py-1.5">
                       <span className="flex items-center gap-2">
-                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: langColor(s.language) }} />
+                        <LangLogo language={s.language} />
                         {s.label}
                       </span>
                       {!s.row && <span className="text-sm text-accent-text">{text.compare.noData}</span>}

@@ -57,7 +57,7 @@ export function DockerChart({ rows }: { rows: DockerRow[] }) {
             const d = payload?.[0]?.payload as DockerRow | undefined;
             if (!active || !d) return null;
             return (
-              <div className="tabular rounded-lg border border-line bg-card px-3 py-2 text-sm shadow-md">
+              <div className="tabular rounded-lg border border-accent/40 bg-card px-3 py-2 font-mono text-xs shadow-[0_0_16px_-2px_var(--glow)]">
                 <div className="font-medium">{d.language}</div>
                 <div className="text-muted">Bare Metal: {fmtRps(d.bme)}</div>
                 <div className="text-muted">Docker: {fmtRps(d.docker)}</div>

@@ -27,7 +27,7 @@ export default async function BenchmarkPage({ params }: { params: Promise<{ lang
           <ChevronLeft className="h-4 w-4" />
           {text.nav.home}
         </Link>
-        <h1 className="mt-1 flex items-center gap-2 text-2xl font-semibold">
+        <h1 className="mt-1 flex items-center gap-2 font-display text-2xl font-black tracking-tight sm:text-3xl">
           <Icon className="h-6 w-6 text-accent" />
           {benchmarkTitle(benchmark, lang)}
         </h1>
