@@ -184,7 +184,7 @@ const en = {
   },
 
   exportCsv: "Export CSV",
-  noData: "No data yet. Run scripts/sync_to_supabase.py in Programming-Benchmark.",
+  noData: "No data yet. Run scripts/sync_to_db.py in Programming-Benchmark.",
 };
 
 type Dict = typeof en;
@@ -366,7 +366,7 @@ const th: Dict = {
   },
 
   exportCsv: "ดาวน์โหลด CSV",
-  noData: "ยังไม่มีข้อมูล ให้รัน scripts/sync_to_supabase.py ใน Programming-Benchmark",
+  noData: "ยังไม่มีข้อมูล ให้รัน scripts/sync_to_db.py ใน Programming-Benchmark",
 };
 
 const dictionaries: Record<Lang, Dict> = { en, th };
